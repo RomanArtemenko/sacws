@@ -1,3 +1,9 @@
+aio-pika==6.8.2
 aiokafka==0.7.2
+aiormq==3.3.1
 asyncio==3.4.3
+idna==3.3
 kafka-python==2.0.2
+multidict==6.0.2
+pamqp==2.3.0
+yarl==1.7.2
