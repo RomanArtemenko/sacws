@@ -18,8 +18,8 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin
       - RABBITMQ_DEFAULT_VHOST=/
     ports:
-      - "5682:5672"
-      - "15682:15672"
+      - "5672:5672"
+      - "15672:15672"
 
   zookeeper:
     image: qnib/plain-zookeeper:2018-04-25
@@ -38,3 +38,42 @@ services:
      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
      - KAFKA_CREATE_TOPICS=common:1:1
+
+  kafka-consumer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - kafka
+      - rabbit
+    command: python3.8 kafka_consumer.py
+    volumes:
+      - ./:/app
+
+  rabbit-consumer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - rabbit
+    command: python3.8 rabbit_consumer.py
+    volumes:
+      - ./:/app
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=eu-west-1
+      - AWS_DEFAULT_REGION=eu-west-1
+      - HOSTNAME_EXTERNAL=localhost
+      - HOSTNAME=localstack
+      - USE_SSL=false
+      - DATA_DIR=/tmp/localstack/data
+      - DEBUG=1
+    volumes:
+      - ./.aws:/docker-entrypoint-initaws.d
+    logging:
+      driver: none
