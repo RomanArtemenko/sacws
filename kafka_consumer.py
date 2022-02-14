@@ -1,4 +1,5 @@
 import logging
+import json
 import sys
 from logging import StreamHandler, Formatter
 
@@ -67,10 +68,12 @@ async def consume():
         # Consume messages
         async for msg in consumer:
             logger.info('got kafka message: {}'.format(msg.value))
-            try:
-                await publisher(msg.value, asyncio.get_running_loop())
-            except Exception as e:
-                logger.error("Error: {}".format(e))
+            msg_json = json.loads(msg.value)
+            if msg_json['action'] == 'save_geometry':
+                try:
+                    await publisher(msg.value, asyncio.get_running_loop())
+                except Exception as e:
+                    logger.error("Error: {}".format(e))
     finally:
         # Will leave consumer group; perform autocommit if enabled.
         logger.info('kafka consumer stop')
